@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, List, Tuple, Dict, Set
 
 from typing_extensions import Protocol
+
 
 # ## Task 1.1
 # Central Difference calculation
@@ -22,7 +23,11 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    l_vals = list(vals)
+    r_vals = list(vals)
+    r_vals[arg] += epsilon
+    l_vals[arg] -= epsilon
+    return (f(*r_vals) - f(*l_vals)) / (2.0 * epsilon)
 
 
 variable_count = 1
@@ -60,7 +65,20 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    res: List[Variable] = []
+    vis: Set[int] = set()
+
+    def dfs(cur: Variable) -> None:
+        if cur.is_constant() or cur.unique_id in vis:
+            return
+
+        vis.add(cur.unique_id)
+        for pa in cur.parents:
+            dfs(pa)
+        res.append(cur)
+
+    dfs(variable)
+    return reversed(res)
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -74,7 +92,21 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    top_order = list(topological_sort(variable))
+    derives: Dict[int, Any] = dict()
+    derives[variable.unique_id] = deriv
+
+    for var in top_order:
+        if var.is_leaf():
+            var.accumulate_derivative(derives[var.unique_id])
+        else:
+            if var.unique_id in derives:
+                der = derives[var.unique_id]
+                for pa, pa_der in var.chain_rule(der):
+                    if pa.unique_id in derives:
+                        derives[pa.unique_id] += pa_der
+                    else:
+                        derives[pa.unique_id] = pa_der
 
 
 @dataclass

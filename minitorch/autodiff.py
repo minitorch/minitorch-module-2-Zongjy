@@ -78,7 +78,7 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         res.append(cur)
 
     dfs(variable)
-    return reversed(res)
+    return list(reversed(res))
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:

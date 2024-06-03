@@ -30,6 +30,7 @@ def test_one_args(
     name, base_fn, tensor_fn = fn
     t2 = tensor_fn(t1)
     for ind in t2._tensor.indices():
+        print(f"{ind}, {t1[ind]}, {t2[ind]} with {base_fn} -> {base_fn(t1[ind])}")
         assert_close(t2[ind], base_fn(t1[ind]))
 
 
